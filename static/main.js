@@ -14,6 +14,8 @@ function stripHttp(url) {
         url = url.substring(11)
     } else if (!url.indexOf("https://www")) {
         url = url.substring(12)
+    } else if (!url.indexOf("https://")) {
+        url = url.substring(8)
     } else if (!url.indexOf("http://")) {
         url = url.substring(7)
     }
