@@ -1,2 +1,1 @@
-web: gunicorn main:app
-init: flask init-db
+web: flask init-db; gunicorn main:app
