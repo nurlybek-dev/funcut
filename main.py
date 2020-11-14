@@ -83,7 +83,7 @@ def shorten_url(url, name):
 def find_url(short_url):
     db = get_db()
     hashed = db.execute(
-        'SELECT * FROM urls WHERE url_hash = ?', (short_url, )).fetchone()
+        'SELECT * FROM urls WHERE url_hash = ? OR url_name = ?', (short_url, short_url)).fetchone()
     if hashed:
         return hashed['url_origin']
     return '/'
