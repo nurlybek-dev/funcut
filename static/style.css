@@ -1,0 +1,171 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-size: 16px;
+    line-height: 1em;
+}
+
+.hide {
+    display: none;
+}
+
+body {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    height: 100vh;
+    background-color: #f9f9f9;
+}
+
+a {
+    text-decoration: none;
+}
+
+a:hover {
+    text-decoration: underline;
+}
+
+.container {
+    width: 100%;
+    padding-left: 0.4em;
+    padding-right: 0.4em;
+    margin-right: auto;
+    margin-left: auto;
+}
+
+.content-center {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+}
+
+header {
+    padding-top: 1em;
+    text-align: center;
+    flex: 1;
+}
+
+header a {
+    color: #0186da;
+    font-size: 48px;
+}
+
+header a:hover {
+    text-decoration: none;
+}
+
+h1 {
+    color: #505050;
+    font-size: 36px;
+    font-weight: bold;
+}
+
+main {
+    flex: 3;
+}
+
+main h1 {
+    margin-bottom: 1em;
+}
+
+#shorten-form {
+    width: 100%;
+    display: flex;
+}
+
+#shorten-form input {
+    width: 100%;
+    height: 56px;
+    padding: 10px 16px;
+    font-size: 17px;
+    color: #000;
+    background: #fff;
+    border: 1px solid #bbb;
+    border-right: 0;
+    border-radius: 3px;
+    border-bottom-right-radius: 0;
+    border-top-right-radius: 0;
+}
+
+#shorten-form button {    
+    height: 56px;
+    padding: 10px 16px;
+    font-size: 17px;
+    font-weight: bold;
+    color: #fff;
+    background-color: #2c87c5;
+    cursor: pointer;
+    border: 0;
+    border-radius: 3px;
+    border-top-left-radius: 0;
+    border-bottom-left-radius: 0;
+
+}
+
+#shorten-result {
+    width: 100%;
+    background-color: white;
+    text-align: center;
+    padding: 1em;
+    border-radius: 0.25em;
+    margin-top: 0.5em;
+}
+
+#shorten-result a {
+    color: #007bff;
+}
+
+#shorten-result span {
+    cursor: pointer;
+    padding: .25rem .5rem;
+    font-size: .875rem;
+    line-height: 1.5;
+    border-radius: .2rem;
+    color: #007bff;
+    display: inline-block;
+    border: 1px solid #007bff;
+    transition: color .15s ease-in-out, background-color .15s ease-in-out;
+}
+
+#shorten-result span:hover {
+    background-color: #007bff;
+    color: white;
+}
+
+#shorten-error {
+    width: 100%;
+    background-color: #dc3545;
+    text-align: center;
+    color: white;
+    padding: 5px;
+    border-radius: 0.25em;
+    margin-top: 0.5em;
+}
+
+footer {
+    padding-top: 10px;
+    padding-bottom: 10px;
+    background-color: #312936;
+}
+
+footer p, footer a {
+    font-size: 1.2em;
+    font-weight: normal;
+    color: white;
+}
+
+
+@media(min-width: 576px) {
+    .container {
+        max-width: 540px;
+    }
+}
+
+@media(min-width: 768px) {
+    .container {
+        max-width: 720px;
+    }
+}
