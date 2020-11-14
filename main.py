@@ -13,7 +13,7 @@ from flask.cli import with_appcontext
 ###
 
 
-def run():
+def run(environ, start_response):
     def init_db():
         db = get_db()
 
