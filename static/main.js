@@ -27,6 +27,7 @@ function stripHttp(url) {
 async function shortenUrl(event) {
     event.preventDefault();
     let url = document.getElementById("url").value;
+    let name = document.getElementById("name").value;
 
     let response = await fetch('/shorten', {
         method: 'POST',
@@ -34,7 +35,8 @@ async function shortenUrl(event) {
             'Content-Type': 'application/json;charset=utf-8'
         },
         body: JSON.stringify({
-            'url': url
+            'url': url,
+            'name': name
         })
     });
     shortenResult.classList.add('hide');

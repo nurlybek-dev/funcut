@@ -1,5 +1,6 @@
 from genericpath import exists
 import os
+from os import error
 import sqlite3
 import click
 import random
@@ -9,9 +10,8 @@ from flask.cli import with_appcontext
 
 
 ###
-### TODO: Unique names, update styles
+# TODO: Unique names, update styles
 ###
-
 
 
 def init_db():
@@ -47,31 +47,47 @@ def close_db(e=None):
         db.close()
 
 
-def shorten_url(url):
+def shorten_url(url, name):
     db = get_db()
+    print(url, name)
+    if name:
+        print('name')
+        exist = db.execute(
+            'SELECT id FROM urls WHERE url_name = ?', (name, )).fetchone()
+        print(exist)
+        if exist:
+            raise ValueError("Custom link already exists")
+        db.execute(
+            'INSERT INTO urls (url_origin, url_name) VALUES (?, ?)', (url, name))
+        db.commit()
+        return name
+    else:
+        hashed = db.execute(
+            'SELECT * FROM urls WHERE url_origin = ? and url_hash IS NOT NULL', (url, )).fetchone()
+        if hashed:
+            return hashed['url_hash']
+        exist = True
+        url_hash = ''
+        while exist:
+            url_hash = ''.join(random.choice(
+                string.ascii_letters + string.digits) for _ in range(9))
+            exist = db.execute(
+                'SELECT id FROM urls WHERE url_hash = ?', (url_hash, )).fetchone() is not None
+        db.execute(
+            'INSERT INTO urls (url_origin, url_hash) VALUES (?, ?)', (url, url_hash))
+        db.commit()
 
-    hashed = db.execute('SELECT * FROM urls WHERE url_origin = ?', (url, )).fetchone()
-    if hashed:
-        return hashed['url_hash']
+        return url_hash
 
-    exist = True
-    url_hash = ''
-    while exist:
-        url_hash = ''.join(random.choice(string.ascii_letters + string.digits) for _ in range(9))
-        exist = db.execute('SELECT id FROM urls WHERE url_hash = ?', (url_hash, )).fetchone() is not None
-
-    print(f"insert {url} : {url_hash}")
-    db.execute('INSERT INTO urls (url_origin, url_hash) VALUES (?, ?)', (url, url_hash))
-    db.commit()
-
-    return url_hash
 
 def find_url(short_url):
     db = get_db()
-    hashed = db.execute('SELECT * FROM urls WHERE url_hash = ?', (short_url, )).fetchone()
+    hashed = db.execute(
+        'SELECT * FROM urls WHERE url_hash = ?', (short_url, )).fetchone()
     if hashed:
         return hashed['url_origin']
     return '/'
+
 
 app = Flask(__name__)
 app.teardown_appcontext(close_db)
@@ -92,10 +108,14 @@ def redir(short_url):
 @app.route('/shorten', methods=['GET', 'POST'])
 def shorten():
     if request.method == 'POST':
-        url = request.json['url']
+        url = request.json.get('url')
+        name = request.json.get('name')
         if not url:
             return jsonify({'status': 400, 'error': 'Enter url'})
-        url_hash = shorten_url(url)
+        try:
+            url_hash = shorten_url(url, name)
+        except ValueError as error:
+            return jsonify({'status': 400, 'error': str(error)})
         return jsonify({'status': 200, 'hash': url_hash})
 
     return redirect('/')
