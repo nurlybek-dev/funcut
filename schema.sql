@@ -1,8 +1,0 @@
-DROP TABLE IF EXISTS urls;
-
-CREATE TABLE urls (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    url_origin TEXT NOT NULL,
-    url_hash TEXT UNIQUE,
-    url_name TEXT UNIQUE
-);

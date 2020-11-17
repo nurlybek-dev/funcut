@@ -1,3 +1,4 @@
+from enum import unique
 from genericpath import exists
 import os
 from os import error
@@ -7,19 +8,11 @@ import random
 import string
 from flask import Flask, request, redirect, render_template, g, current_app, jsonify
 from flask.cli import with_appcontext
-
-
-###
-# TODO: Unique names, update styles
-###
+from flask_sqlalchemy import SQLAlchemy
 
 
 def init_db():
-    db = get_db()
-
-    with current_app.open_resource('schema.sql') as f:
-        db.executescript(f.read().decode('utf8'))
-
+    db.create_all()
 
 @click.command('init-db')
 @with_appcontext
@@ -29,69 +22,50 @@ def init_db_command():
     click.echo('Initialized the database.')
 
 
-def get_db():
-    if 'db' not in g:
-        g.db = sqlite3.connect(
-            os.path.join(os.path.curdir, 'urls.sqlite'),
-            detect_types=sqlite3.PARSE_DECLTYPES
-        )
-        g.db.row_factory = sqlite3.Row
-
-    return g.db
-
-
-def close_db(e=None):
-    db = g.pop('db', None)
-
-    if db is not None:
-        db.close()
-
-
 def shorten_url(url, name):
-    db = get_db()
-    print(url, name)
     if name:
-        print('name')
-        exist = db.execute(
-            'SELECT id FROM urls WHERE url_name = ?', (name, )).fetchone()
-        print(exist)
+        exist = Urls.query.filter_by(url_name=name).first()
         if exist:
             raise ValueError("Custom link already exists")
-        db.execute(
-            'INSERT INTO urls (url_origin, url_name) VALUES (?, ?)', (url, name))
-        db.commit()
+        db.session.add(Urls(url_origin=url, url_name=name))
+        db.session.commit()
         return name
     else:
-        hashed = db.execute(
-            'SELECT * FROM urls WHERE url_origin = ? and url_hash IS NOT NULL', (url, )).fetchone()
+        hashed = Urls.query.filter_by(url_origin=url).filter(Urls.url_hash.isnot(None)).first() 
         if hashed:
-            return hashed['url_hash']
+            return hashed.url_hash
         exist = True
         url_hash = ''
         while exist:
             url_hash = ''.join(random.choice(
                 string.ascii_letters + string.digits) for _ in range(9))
-            exist = db.execute(
-                'SELECT id FROM urls WHERE url_hash = ?', (url_hash, )).fetchone() is not None
-        db.execute(
-            'INSERT INTO urls (url_origin, url_hash) VALUES (?, ?)', (url, url_hash))
-        db.commit()
+            exist = Urls.query.filter_by(url_hash=url_hash).first() is not None
+        db.session.add(Urls(url_origin=url, url_hash=url_hash))
+        db.session.commit()
 
         return url_hash
 
 
 def find_url(short_url):
-    db = get_db()
-    hashed = db.execute(
-        'SELECT * FROM urls WHERE url_hash = ? OR url_name = ?', (short_url, short_url)).fetchone()
+    hashed = Urls.query.filter((Urls.url_hash == short_url) | (Urls.url_name == short_url)).first()
     if hashed:
-        return hashed['url_origin']
+        return hashed.url_origin
     return '/'
 
 
 app = Flask(__name__)
-app.teardown_appcontext(close_db)
+app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql+psycopg2://funcut:funcut@127.0.0.1:5432/funcut'
+app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.cli.add_command(init_db_command)
+
+db = SQLAlchemy(app)
+
+
+class Urls(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    url_origin = db.Column(db.String(), nullable=False)
+    url_hash = db.Column(db.String(), unique=True)
+    url_name = db.Column(db.String(), unique=True)
 
 
 @app.route('/')
