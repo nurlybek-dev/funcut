@@ -1,2 +1,2 @@
 web: gunicorn main:app
-init: flask init-db
+init: python create_db.py
