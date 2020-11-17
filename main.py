@@ -53,8 +53,12 @@ def find_url(short_url):
     return '/'
 
 
+basedir = os.path.curdir
 app = Flask(__name__)
-app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql+psycopg2://funcut:funcut@127.0.0.1:5432/funcut'
+if os.environ.get('DATABASE_URL') is None:
+    SQLALCHEMY_DATABASE_URI = 'sqlite:///' + os.path.join(basedir, 'app.db')
+else:
+    SQLALCHEMY_DATABASE_URI = os.environ['DATABASE_URL']
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.cli.add_command(init_db_command)
 
