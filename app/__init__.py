@@ -14,6 +14,7 @@ def create_app(config_class=Config):
     app.config.from_object(config_class)
 
     db.init_app(app)
+    print(app.config['REDIS_URL'])
     redis = Redis.from_url(app.config['REDIS_URL'])
 
     from app.cli import init_db_command
