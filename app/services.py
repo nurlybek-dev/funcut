@@ -33,7 +33,6 @@ def shorten_url(url, name):
 
 def find_url(short_url):
     if redis.exists(short_url):
-        print("Get from redis")
         return redis.get(short_url)
     hashed = Urls.query.filter((Urls.url_hash == short_url) | (Urls.url_name == short_url)).first()
     if hashed:
